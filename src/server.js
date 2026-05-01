@@ -65,6 +65,7 @@ app.use(express.static(distPath))
 app.get('*', (req, res) => {
   res.sendFile(path.join(distPath, 'index.html'))
 })
+
 // ── Trust proxy (for IP detection behind nginx/load balancer) ─────────────────
 app.set('trust proxy', 1)
 
