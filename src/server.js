@@ -58,9 +58,8 @@ if (process.env.NODE_ENV !== 'test') {
 // Serve frontend (dist)
 const path = require('path')
 
-// Serve frontend
 
-const distPath = path.join(__dirname, 'dist')
+const distPath = path.join(__dirname, 'Frontend', 'dist')
 
 app.use(express.static(distPath))
 
