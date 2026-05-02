@@ -56,15 +56,13 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 // Serve frontend (dist)
-const path = require('path')
+const path = require("path");
 
-const distPath = path.join(__dirname, 'Frontend', 'dist')
+app.use(express.static(path.join(__dirname, "../Frontend/dist")));
 
-app.use(express.static(distPath))
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'))
-})
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../Frontend/dist/index.html"));
+});
 
 // ── Trust proxy (for IP detection behind nginx/load balancer) ─────────────────
 app.set('trust proxy', 1)
