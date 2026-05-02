@@ -10,7 +10,7 @@ const BASE =
 // Always use /api once
 const API = axios.create({
   baseURL: `${BASE}/api`,
-  timeout: 15000,
+  timeout: 60000 , // 60 seconds,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
