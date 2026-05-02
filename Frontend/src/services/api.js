@@ -1,23 +1,25 @@
 import axios from 'axios'
 
-// ───────────────────────────────────────────────────────────
-// BASE CONFIG
-// ───────────────────────────────────────────────────────────
-const BASE = import.meta.env.VITE_API_URL || ''
+// ─────────────────────────────────────────
+// BASE CONFIG (FIXED)
+// ─────────────────────────────────────────
+const BASE =
+  import.meta.env.VITE_API_URL ||
+  window.location.origin   // ✅ fallback (IMPORTANT for Render)
 
-// Always use /api prefix once
+// Always use /api once
 const API = axios.create({
   baseURL: `${BASE}/api`,
   timeout: 15000,
-  withCredentials: true, // 🔥 important for cookies/auth
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }
 })
 
-// ───────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 // TOKEN HELPERS
-// ───────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 const getAccess = () => localStorage.getItem('accessToken')
 const getRefresh = () => localStorage.getItem('refreshToken')
 
@@ -31,9 +33,9 @@ const clearSession = () => {
   window.location.href = '/login'
 }
 
-// ───────────────────────────────────────────────────────────
-// REQUEST INTERCEPTOR (Attach token)
-// ───────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
+// REQUEST INTERCEPTOR
+// ─────────────────────────────────────────
 API.interceptors.request.use(
   (config) => {
     const token = getAccess()
@@ -46,9 +48,9 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-// ───────────────────────────────────────────────────────────
-// RESPONSE INTERCEPTOR (Auto refresh)
-// ───────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
+// RESPONSE INTERCEPTOR (FIXED)
+// ─────────────────────────────────────────
 let refreshing = false
 let queue = []
 
@@ -71,7 +73,6 @@ API.interceptors.response.use(
 
     if (isExpired && !original._retry) {
 
-      // If already refreshing → queue requests
       if (refreshing) {
         return new Promise((resolve, reject) => {
           queue.push({ resolve, reject })
@@ -88,7 +89,6 @@ API.interceptors.response.use(
         const refreshToken = getRefresh()
         if (!refreshToken) throw new Error('No refresh token')
 
-        // ⚡ IMPORTANT: use SAME base instance OR axios (no interceptor loop)
         const { data } = await axios.post(
           `${BASE}/api/auth/refresh-token`,
           { refreshToken }
@@ -116,9 +116,9 @@ API.interceptors.response.use(
   }
 )
 
-// ───────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 // ERROR HANDLER
-// ───────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
 export const errMsg = (e) =>
   e?.response?.data?.errors?.map(x => x.message).join(', ')
   || e?.response?.data?.message
@@ -127,9 +127,9 @@ export const errMsg = (e) =>
       : e?.message)
   || 'Something went wrong'
 
-// ───────────────────────────────────────────────────────────
-// AUTH API
-// ───────────────────────────────────────────────────────────
+// ─────────────────────────────────────────
+// APIs
+// ─────────────────────────────────────────
 export const authAPI = {
   register:       (d) => API.post('/auth/register', d),
   login:          (d) => API.post('/auth/login', d),
@@ -138,14 +138,10 @@ export const authAPI = {
   verifyOTP:      (email, otp) => API.post('/auth/verify-otp', { email, otp }),
   resetPassword:  (tok, pwd) => API.post('/auth/reset-password', { resetToken: tok, newPassword: pwd }),
   resendOTP:      (email, type) => API.post('/auth/resend-otp', { email, type }),
-  refreshToken:   (rt) => API.post('/auth/refresh-token', { refreshToken: rt }),
   verify2FA:      (userId, otp) => API.post('/auth/verify-2fa', { userId, otp }),
   logout:         (data) => API.post('/auth/logout', data),
 }
 
-// ───────────────────────────────────────────────────────────
-// USER API
-// ───────────────────────────────────────────────────────────
 export const userAPI = {
   me:          () => API.get('/users/me'),
   updateMe:    (d) => API.patch('/users/me', d),
@@ -155,9 +151,7 @@ export const userAPI = {
   deactivate:  (id) => API.delete(`/users/${id}`),
 }
 
-// ───────────────────────────────────────────────────────────
-// HEALTH CHECK
-// ───────────────────────────────────────────────────────────
+// ✅ HEALTH FIX
 export const healthAPI = () => axios.get(`${BASE}/health`)
 
 export default API
