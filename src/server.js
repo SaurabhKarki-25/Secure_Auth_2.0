@@ -18,6 +18,9 @@ const userRoutes = require('./routes/users')
 
 const app = express()
 
+require('dns').resolve('smtp.gmail.com', (err) => {
+  console.log("DNS Test:", err ? "FAIL" : "OK");
+});
 // ── Security middleware ────────────────────────────────────────────────────────
 
 
