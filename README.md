@@ -5,9 +5,6 @@ It provides **multi-layered authentication, account protection, and advanced sec
 
 ---
 
-## 🌐 Live Demo
-https://your-app.onrender.com
-
 ---
 
 ## ✨ Features
