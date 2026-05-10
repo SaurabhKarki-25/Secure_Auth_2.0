@@ -1,25 +1,46 @@
 const nodemailer = require('nodemailer')
 const logger = require('../utils/logger')
 
+let transporter
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: parseInt(process.env.EMAIL_PORT),
-  secure: false,
+const getTransporter = () => {
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: Number(process.env.EMAIL_PORT),
 
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
+      secure: false,
+      requireTLS: true,
 
-  tls: {
-    rejectUnauthorized: false,
-  },
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
 
-  connectionTimeout: 60000,
-  greetingTimeout: 30000,
-  socketTimeout: 60000,
-})
+      tls: {
+        rejectUnauthorized: false,
+      },
+
+      pool: true,
+      maxConnections: 5,
+      maxMessages: 100,
+
+      connectionTimeout: 120000,
+      greetingTimeout: 60000,
+      socketTimeout: 120000,
+    })
+
+    transporter.verify((err) => {
+      if (err) {
+        logger.error(`❌ SMTP Error: ${err.message}`)
+      } else {
+        logger.info('✅ SMTP Server Ready')
+      }
+    })
+  }
+
+  return transporter
+}
 
 
 // ── Base HTML template ────────────────────────────────────────────────────────
