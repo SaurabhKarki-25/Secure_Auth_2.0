@@ -93,13 +93,11 @@ app.use('/api/users', userRoutes)
 
 // Serve frontend (dist)
 
-
-app.use(express.static(path.join(__dirname, "./dist")));
+app.use(express.static(path.join(__dirname, "../Frontend/dist")));
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../Frontend/dist/index.html"));
 });
-
 
 // ── API info ───────────────────────────────────────────────────────────────────
 app.get('/api', (req, res) => {
