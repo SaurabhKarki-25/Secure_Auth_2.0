@@ -1,7 +1,6 @@
 const nodemailer = require('nodemailer')
 const logger = require('../utils/logger')
 
-let transporter
 
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
