@@ -21,17 +21,6 @@ const transporter = nodemailer.createTransport({
   greetingTimeout: 30000,
   socketTimeout: 60000,
 })
-    transporter.verify((err, success) => {
-      if (err) {
-        logger.error(`❌ Zoho SMTP Error: ${err.message}`)
-      } else {
-        logger.info('✅ Zoho SMTP Ready')
-      }
-    })
-  }
-
-  return transporter
-}
 
 
 // ── Base HTML template ────────────────────────────────────────────────────────
