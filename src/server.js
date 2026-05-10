@@ -6,6 +6,7 @@ const compression = require('compression')
 const mongoSanitize = require('express-mongo-sanitize')
 const cookieParser = require('cookie-parser')
 const morgan = require('morgan')
+const path = require("path");
 
 const connectDB = require('./config/database')
 const logger = require('./utils/logger')
@@ -91,9 +92,9 @@ app.use('/api/users', userRoutes)
 
 
 // Serve frontend (dist)
-const path = require("path");
 
-app.use(express.static(path.join(__dirname, "../Frontend/dist")));
+
+app.use(express.static(path.join(__dirname, "./dist")));
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../Frontend/dist/index.html"));

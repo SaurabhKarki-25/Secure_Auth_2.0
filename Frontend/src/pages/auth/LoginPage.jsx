@@ -16,39 +16,47 @@ export default function LoginPage() {
   const { register, handleSubmit, formState: { errors } } = useForm()
 
   const onSubmit = async (d) => {
-    setLoading(true)
-    try {
-      const r = await login(d)
+  setLoading(true)
 
-      // 🔐 OTP
-      if (r?.step === "OTP_REQUIRED") {
-        navigate('/verify-otp', { state: { userId: r.userId } })
-        return
-      }
+  try {
+    const r = await login(d)
 
-      // 🔐 TOTP
-      if (r?.step === "TOTP_REQUIRED") {
-        navigate('/verify-2fa', { state: { userId: r.userId } })
-        return
-      }
+    // 🔐 STEP BASED FLOW (NO CONFUSION)
 
-      // ✅ SUCCESS
-      navigate('/dashboard')
-
-    } catch (e) {
-      const msg = errMsg(e)
-      toast.error(msg)
-
-      if (msg.toLowerCase().includes('verify')) {
-        setTimeout(() => {
-          navigate(`/verify-email?email=${encodeURIComponent(d.email)}`)
-        }, 1500)
-      }
-    } finally {
-      setLoading(false)
+    if (r?.step === "EMAIL_NOT_VERIFIED") {
+      navigate(`/verify-email?email=${encodeURIComponent(d.email)}`)
+      return
     }
-  }
 
+    if (r?.step === "OTP_REQUIRED") {
+      navigate('/verify-2fa', { state: { userId: r.userId } })
+      return
+    }
+
+    if (r?.step === "TOTP_REQUIRED") {
+      navigate('/reset-password', { state: { userId: r.userId } })
+      return
+    }
+
+    // ✅ SUCCESS LOGIN
+    navigate('/dashboard')
+
+  } catch (e) {
+    const errorCode = e?.response?.data?.error
+    const msg = errMsg(e)
+
+    toast.error(msg)
+
+    // 🔥 ONLY EMAIL VERIFY SHOULD REDIRECT HERE
+    if (errorCode === "EMAIL_NOT_VERIFIED") {
+      navigate(`/verify-email?email=${encodeURIComponent(d.email)}`)
+    }
+
+    // ❌ DO NOT HANDLE OTP/TOTP HERE
+  } finally {
+    setLoading(false)
+  }
+}
   return (
     <AuthShell title="Welcome back" subtitle="Sign in to your account" back={{ to: '/', label: '← Home' }}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>

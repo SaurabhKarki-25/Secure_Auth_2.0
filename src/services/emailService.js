@@ -6,28 +6,35 @@ let transporter
 const getTransporter = () => {
   if (!transporter) {
     transporter = nodemailer.createTransport({
-      service:"gmail",
       host: process.env.EMAIL_HOST,
       port: parseInt(process.env.EMAIL_PORT),
       secure: process.env.EMAIL_SECURE === 'true',
+
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
+      },
+
+      tls: {
+        rejectUnauthorized: false,
       },
 
       connectionTimeout: 30000,
       greetingTimeout: 20000,
       socketTimeout: 30000,
     })
-     transporter.verify()
-      .then(() => logger.info('✅ Gmail SMTP Ready'))
-      .catch(err => logger.error('❌ Gmail SMTP Error:', err.message))
+
+    transporter.verify((err, success) => {
+      if (err) {
+        logger.error(`❌ Zoho SMTP Error: ${err.message}`)
+      } else {
+        logger.info('✅ Zoho SMTP Ready')
+      }
+    })
   }
 
-   return transporter
-  }
-  
- 
+  return transporter
+}
 
 
 // ── Base HTML template ────────────────────────────────────────────────────────
