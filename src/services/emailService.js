@@ -1,45 +1,21 @@
-const nodemailer = require('nodemailer')
+const SibApiV3Sdk = require('sib-api-v3-sdk')
 const logger = require('../utils/logger')
 
-let transporter
+let apiInstance
 
 const getTransporter = () => {
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: Number(process.env.EMAIL_PORT),
+  if (!apiInstance) {
+    const defaultClient = SibApiV3Sdk.ApiClient.instance
 
-      secure: false,
-      requireTLS: true,
+    const apiKey = defaultClient.authentications['api-key']
+    apiKey.apiKey = process.env.BREVO_API_KEY
 
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
+    apiInstance = new SibApiV3Sdk.TransactionalEmailsApi()
 
-      tls: {
-        rejectUnauthorized: false,
-      },
-
-      pool: true,
-      maxConnections: 5,
-      maxMessages: 100,
-
-      connectionTimeout: 120000,
-      greetingTimeout: 60000,
-      socketTimeout: 120000,
-    })
-
-    transporter.verify((err) => {
-      if (err) {
-        logger.error(`❌ SMTP Error: ${err.message}`)
-      } else {
-        logger.info('✅ SMTP Server Ready')
-      }
-    })
+    logger.info('✅ Brevo Email Service Ready')
   }
 
-  return transporter
+  return apiInstance
 }
 
 
@@ -240,16 +216,27 @@ const templates = {
 // ── Send email ────────────────────────────────────────────────────────────────
 const sendEmail = async ({ to, subject, html }) => {
   try {
-    const info = await getTransporter().sendMail({
-      from: `"SecureAuth" <${process.env.EMAIL_FROM}>`,
-      to,
+    const result = await getTransporter().sendTransacEmail({
+      sender: {
+        name: 'SecureAuth',
+        email: process.env.EMAIL_FROM,
+      },
+
+      to: [
+        {
+          email: to,
+        },
+      ],
+
       subject,
-      html,
+      htmlContent: html,
     })
-    logger.info(`Email sent to ${to}: ${subject} [${info.messageId}]`)
-    return info
+
+    logger.info(`✅ Email sent to ${to}: ${subject}`)
+
+    return result
   } catch (err) {
-    logger.error(`Email failed to ${to}: ${err.message}`)
+    logger.error(`❌ Email failed to ${to}: ${err.message}`)
     throw err
   }
 }
