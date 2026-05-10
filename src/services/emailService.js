@@ -3,27 +3,24 @@ const logger = require('../utils/logger')
 
 let transporter
 
-const getTransporter = () => {
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: parseInt(process.env.EMAIL_PORT),
-      secure: process.env.EMAIL_SECURE === 'true',
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST,
+  port: parseInt(process.env.EMAIL_PORT),
+  secure: false,
 
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
 
-      tls: {
-        rejectUnauthorized: false,
-      },
+  tls: {
+    rejectUnauthorized: false,
+  },
 
-      connectionTimeout: 30000,
-      greetingTimeout: 20000,
-      socketTimeout: 30000,
-    })
-
+  connectionTimeout: 60000,
+  greetingTimeout: 30000,
+  socketTimeout: 60000,
+})
     transporter.verify((err, success) => {
       if (err) {
         logger.error(`❌ Zoho SMTP Error: ${err.message}`)
